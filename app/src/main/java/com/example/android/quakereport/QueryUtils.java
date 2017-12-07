@@ -61,7 +61,7 @@ public final class QueryUtils {
                 String place=properties.getString("place");
                 long time= properties.getLong("time");
 
-                earthquakes.add(new Earthquake(mag,place, dateToString(time)));
+                earthquakes.add(new Earthquake(mag,place, time));
             }
 
         } catch (JSONException e) {
@@ -74,11 +74,6 @@ public final class QueryUtils {
         // Return the list of earthquakes
         return earthquakes;
     }
-    private static String dateToString(long timeInMIlliseconds){
-        Date dateObject=new Date(timeInMIlliseconds);
-        SimpleDateFormat dateFormatter=new SimpleDateFormat("MMM DD, yyyy");
-        String dateToDisplay=dateFormatter.format(dateObject);
-        return dateToDisplay;
-    }
+
 
 }

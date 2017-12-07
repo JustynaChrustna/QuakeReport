@@ -11,27 +11,25 @@
         android:layout_weight="1"
         android:layout_height="wrap_content"
         tools:text="7.2"
-        android:textSize="18dp"
-        android:textAlignment="center"
-        android:gravity="center_vertical"
+
         />
     <TextView
         android:id="@+id/location"
         android:layout_width="0dp"
         android:layout_weight="1"
-        android:layout_height="match_parent"
-        android:textSize="18dp"
-        tools:text="San Francisco"
-        android:textAlignment="center"
-        android:gravity="center_vertical"/>
+        android:layout_height="wrap_content"
+        tools:text="San Francisco" />
     <TextView
         android:id="@+id/date"
         android:layout_width="0dp"
         android:layout_weight="1"
-        android:layout_height="match_parent"
-        android:textSize="18dp"
-        tools:text="Feb 2, 2016"
-        android:textAlignment="center"
-        android:gravity="center_vertical"/>
+        android:layout_height="wrap_content"
+        tools:text="Feb 2, 2016" />
+    <TextView
+        android:id="@+id/time"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        tools:text="3:00 PM" />
 
 </LinearLayout>
