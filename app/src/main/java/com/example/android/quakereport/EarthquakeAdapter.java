@@ -7,6 +7,7 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.TextView;
 
+import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -25,15 +26,33 @@ public class EarthquakeAdapter extends ArrayAdapter<Earthquake> {
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
         View listItemView = convertView;
+        String primaryLocation;
+        String locationOffset;
+        final String LOCATION_SEPARATOR = " of ";
         if (listItemView == null) {
             listItemView = LayoutInflater.from(getContext()).inflate(
                     R.layout.earthquake_list_item, parent, false);
         }
+
         Earthquake currentEarthquake= getItem(position);
+        String originalLocation = currentEarthquake.getmLocation();
+        if (originalLocation.contains(LOCATION_SEPARATOR)) {
+            String[] parts = originalLocation.split(LOCATION_SEPARATOR);
+            locationOffset = parts[0] + LOCATION_SEPARATOR;
+            primaryLocation = parts[1];
+        } else {
+            locationOffset = getContext().getString(R.string.near_the);
+            primaryLocation = originalLocation;
+        }
+        TextView primaryLocationView = (TextView) listItemView.findViewById(R.id.primary_location);
+        primaryLocationView.setText(primaryLocation);
+
+        TextView locationOffsetView = (TextView) listItemView.findViewById(R.id.location_offset);
+        locationOffsetView.setText(locationOffset);
         TextView magnitudeTextView= (TextView) listItemView.findViewById(R.id.magnitude);
-        magnitudeTextView.setText(currentEarthquake.getmMagnitude());
-        TextView locationTextView= (TextView) listItemView.findViewById(R.id.location);
-        locationTextView.setText(currentEarthquake.getmLocation());
+        String formattedMagnitude=formatMagnitude(currentEarthquake.getmMagnitude());
+        magnitudeTextView.setText(formattedMagnitude);
+
         TextView dateTextView= (TextView) listItemView.findViewById(R.id.date);
         Date dateObject =new Date(currentEarthquake.getmTimeInMilliseconds());
         String formattedDate=formatDate(dateObject);
@@ -51,5 +70,9 @@ public class EarthquakeAdapter extends ArrayAdapter<Earthquake> {
     private String formatTime(Date dateObject) {
         SimpleDateFormat timeFormat = new SimpleDateFormat("h:mm a");
         return timeFormat.format(dateObject);
+    }
+    private String formatMagnitude(double magnitude) {
+        DecimalFormat magnitudeFormat = new DecimalFormat("0.0");
+        return magnitudeFormat.format(magnitude);
     }
 }
