@@ -9,6 +9,10 @@ Used in a Udacity course in the Beginning Android Nanodegree.
 More info on the USGS Earthquake API available at:
 https://earthquake.usgs.gov/fdsnws/event/1/
 
+![](Screenshot.png)
+
+
+
 Pre-requisites
 --------------
 
