@@ -15,34 +15,110 @@
  */
 package com.example.android.quakereport;
 
+import android.content.Context;
+import android.content.Intent;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
+import android.net.Uri;
 import android.os.Bundle;
+
+
 import android.support.v7.app.AppCompatActivity;
-import android.widget.ArrayAdapter;
+import android.util.Log;
+import android.view.View;
+import android.widget.AdapterView;
+
 import android.widget.ListView;
 
-import java.util.ArrayList;
+import android.app.LoaderManager;
+import android.app.LoaderManager.LoaderCallbacks;
+import android.content.Loader;
 
-public class EarthquakeActivity extends AppCompatActivity {
+import android.widget.TextView;
+
+import java.util.ArrayList;
+import java.util.List;
+
+public class EarthquakeActivity extends AppCompatActivity implements LoaderCallbacks<List<Earthquake>> {
 
     public static final String LOG_TAG = EarthquakeActivity.class.getName();
+    private static final String USGS_REQUEST_URL =
+            "https://earthquake.usgs.gov/fdsnws/event/1/query?format=geojson&orderby=time&minmag=6&limit=10";
+    private static final int EARTHQUAKE_LOADER_ID = 1;
+    private EarthquakeAdapter mAdapter;
+    private TextView mEmptyStateTextView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
+        Log.i(LOG_TAG, "TEST: Earthquake Activity onCreate() called");
         super.onCreate(savedInstanceState);
         setContentView(R.layout.earthquake_activity);
-
-        // Create a fake list of earthquake locations.
-        ArrayList<Earthquake> earthquakes = QueryUtils.extractEarthquakes();
-
-        // Find a reference to the {@link ListView} in the layout
+        ConnectivityManager cm =
+                (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
+        boolean isConnected = activeNetwork != null &&
+                activeNetwork.isConnected();
         ListView earthquakeListView = (ListView) findViewById(R.id.list);
+        mAdapter = new EarthquakeAdapter(this, new ArrayList<Earthquake>());
 
-        // Create a new {@link ArrayAdapter} of earthquakes
-        EarthquakeAdapter adapter = new EarthquakeAdapter(
-                this, earthquakes);
+        mEmptyStateTextView = (TextView) findViewById(R.id.empty_view);
+        earthquakeListView.setEmptyView(mEmptyStateTextView);
+        earthquakeListView.setAdapter(mAdapter);
+        earthquakeListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int position, long l) {
+                Earthquake currentEarthquake = mAdapter.getItem(position);
 
-        // Set the adapter on the {@link ListView}
-        // so the list can be populated in the user interface
-        earthquakeListView.setAdapter(adapter);
+                Uri earthquakeUri = Uri.parse(currentEarthquake.getUrl());
+
+                Intent websiteIntent = new Intent(Intent.ACTION_VIEW, earthquakeUri);
+
+                startActivity(websiteIntent);
+            }
+        });
+        if (isConnected) {
+            LoaderManager loaderManager = getLoaderManager();
+            loaderManager.initLoader(EARTHQUAKE_LOADER_ID, null, this);
+            Log.i(LOG_TAG, "TEST: calling initLoader()");
+        } else {
+            View progressBar = findViewById(R.id.loading_spinner);
+            progressBar.setVisibility(View.GONE);
+            mEmptyStateTextView.setText(R.string.no_connection);
+        }
+
     }
+
+
+    @Override
+    public Loader<List<Earthquake>> onCreateLoader(int i, Bundle bundle) {
+        EarthquakeLoader earthquakeLoader = new EarthquakeLoader(this, USGS_REQUEST_URL);
+        Log.i(LOG_TAG, "TEST: onCreateLoader() called");
+        return earthquakeLoader;
+
+    }
+
+
+    @Override
+    public void onLoadFinished(Loader<List<Earthquake>> loader, List<Earthquake> earthquakes) {
+        View progressBar = findViewById(R.id.loading_spinner);
+        progressBar.setVisibility(View.GONE);
+        mEmptyStateTextView.setText(R.string.no_earthquakes);
+        mAdapter.clear();
+        if (earthquakes != null && !earthquakes.isEmpty()) {
+            mAdapter.addAll(earthquakes);
+
+            Log.i(LOG_TAG, "TEST: onLoadFinished() called");
+
+        }
+
+    }
+
+    @Override
+    public void onLoaderReset(Loader<List<Earthquake>> loader) {
+        mAdapter.clear();
+        Log.i(loader.getClass().getName(), "TEST: onLoadReset() called");
+    }
+
+
 }
